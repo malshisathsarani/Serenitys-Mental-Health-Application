@@ -7,6 +7,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, confusion_matrix
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import seaborn as sns
 import joblib
@@ -101,26 +103,31 @@ def train_baseline_model():
     print(classification_report(y_test, y_pred))
     
     # Confusion Matrix
-    print("\nGenerating confusion matrix visualization...")
-    cm = confusion_matrix(y_test, y_pred)
-    plt.figure(figsize=(10, 8))
-    sns.heatmap(
-        cm, 
-        annot=True, 
-        fmt="d", 
-        cmap="Blues",
-        xticklabels=model.classes_,
-        yticklabels=model.classes_
-    )
-    plt.title("Confusion Matrix - Mental Health Text Classification")
-    plt.ylabel("True Label")
-    plt.xlabel("Predicted Label")
-    plt.tight_layout()
-    
-    # Save plot
-    plot_path = settings.DATA_DIR / "confusion_matrix.png"
-    plt.savefig(plot_path, dpi=300, bbox_inches='tight')
-    print(f"Confusion matrix saved to: {plot_path}")
+    try:
+        print("\nGenerating confusion matrix visualization...")
+        cm = confusion_matrix(y_test, y_pred)
+        plt.figure(figsize=(10, 8))
+        sns.heatmap(
+            cm,
+            annot=True,
+            fmt="d",
+            cmap="Blues",
+            xticklabels=model.classes_,
+            yticklabels=model.classes_,
+        )
+        plt.title("Confusion Matrix - Mental Health Text Classification")
+        plt.ylabel("True Label")
+        plt.xlabel("Predicted Label")
+        plt.tight_layout()
+
+        # Save plot
+        plot_path = settings.DATA_DIR / "confusion_matrix.png"
+        plt.savefig(plot_path, dpi=300, bbox_inches="tight")
+        print(f"Confusion matrix saved to: {plot_path}")
+    except Exception as e:
+        print(f"Skipping confusion matrix plot due to plotting error: {e}")
+    finally:
+        plt.close("all")
     
     # Save model
     print(f"\n[FINAL] Saving model and vectorizer")
