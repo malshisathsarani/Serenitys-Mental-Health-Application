@@ -83,3 +83,11 @@ backend/models/*.h5
 !backend/data/.gitkeep
 !backend/models/.gitkeep
 !backend/logs/.gitkeep
+
+# Virtualenv variants (e.g., venv312) at root and nested
+venv*/
+**/venv*/
+backend/venv*/
+
+# Nested coverage directories
+**/htmlcov/
