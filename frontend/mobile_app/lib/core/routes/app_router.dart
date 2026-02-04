@@ -7,6 +7,7 @@ import '../../features/auth/screens/signup_screen.dart';
 import '../../features/home/screens/home_screen.dart';
 import '../../features/chat/screens/chat_screen.dart';
 import '../../features/tools/screens/tools_screen.dart';
+import '../../features/tools/screens/breathing_bubble_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
 import '../../features/crisis/screens/crisis_screen.dart';
 
@@ -43,6 +44,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/tools',
       builder: (context, state) => const ToolsScreen(),
+    ),
+    GoRoute(
+      path: '/breathing-bubble',
+      builder: (context, state) => const BreathingBubbleScreen(),
     ),
     GoRoute(
       path: '/profile',
