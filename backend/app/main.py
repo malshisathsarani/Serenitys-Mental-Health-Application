@@ -8,7 +8,7 @@ import logging
 
 from app.core.config import settings
 from app.core.logging import setup_logging
-from app.api.routes import health, ml
+from app.api.routes import health, ml, chat
 from app.services.ml_service import get_ml_service
 
 # Setup logging
@@ -66,6 +66,7 @@ async def shutdown_event():
 # Include routers
 app.include_router(health.router)
 app.include_router(ml.router, prefix="/api")
+app.include_router(chat.router, prefix="/api")
 
 
 # Run application
