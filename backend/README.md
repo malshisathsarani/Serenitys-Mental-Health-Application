@@ -1,303 +1,185 @@
-# Mental Health Risk API - Backend
+# Serenity Backend API
 
-Production-ready FastAPI backend for mental health text analysis and risk assessment.
+Production-ready FastAPI backend for mental health text analysis with ML integration.
 
-## 📁 Project Structure
+## 🏗️ Project Structure
 
 ```
 backend/
-├── app/                    # Main application code
-│   ├── __init__.py
-│   └── main.py            # FastAPI application
-├── scripts/               # Data processing and training scripts
-│   ├── __init__.py
-│   ├── combine_csv.py     # Combine multiple CSV datasets
-│   ├── train_baseline.py  # Train the ML model
-│   └── predict.py         # Interactive prediction CLI
-├── tests/                 # Test suite
-│   ├── __init__.py
-│   ├── test_api.py        # API endpoint tests
-│   ├── test_config.py     # Configuration tests
-│   └── test_model.py      # Model and safety rule tests
-├── data/                  # Data files (gitignored)
-│   └── .gitkeep
-├── models/                # Trained ML models (gitignored)
-│   └── .gitkeep
-├── logs/                  # Application logs (gitignored)
-│   └── .gitkeep
-├── config.py              # Configuration management
-├── logging_config.py      # Logging setup
-├── requirements.txt       # Python dependencies
-├── pytest.ini            # Pytest configuration
-├── .env.example          # Environment variables template
-└── README.md             # This file
+├── app/                    # Main application package
+│   ├── api/               # API layer
+│   │   └── routes/       # API route definitions
+│   │       ├── health.py # Health check endpoints
+│   │       └── ml.py     # ML prediction endpoints
+│   ├── core/             # Core configuration
+│   │   ├── config.py     # Application settings
+│   │   └── logging.py    # Logging configuration
+│   ├── services/         # Business logic layer
+│   │   └── ml_service.py # ML model integration
+│   ├── models/           # Data models
+│   │   └── schemas.py    # Pydantic schemas
+│   └── main.py          # FastAPI application entry point
+├── tests/               # Test suite
+├── logs/               # Application logs
+├── requirements.txt    # Python dependencies
+└── .env.example       # Environment variables template
 ```
 
-## 🚀 Getting Started
+## 🚀 Features
 
-### Prerequisites
+- **ML Integration**: Seamless integration with ML module for mental health text classification
+- **Production-Ready**: Comprehensive logging, error handling, and monitoring
+- **API Documentation**: Auto-generated OpenAPI/Swagger docs
+- **Health Checks**: Monitoring endpoints for service health
+- **CORS Support**: Configurable CORS for frontend integration
+- **Environment-Based Config**: Easy configuration for dev/staging/prod
 
-- Python 3.9 or higher
-- pip (Python package manager)
+## 📋 Prerequisites
 
-### Installation
+- Python 3.12+
+- Trained ML model in `../ml/models/`
 
-1. **Create and activate a virtual environment:**
+## 🛠️ Installation
 
+1. **Create virtual environment**:
+   ```bash
+   python -m venv venv
+   source venv/Scripts/activate  # Windows
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Configure environment**:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your settings
+   ```
+
+4. **Train ML model** (if not done):
+   ```bash
+   cd ../ml
+   python src/training/train_baseline.py
+   ```
+
+## 🏃 Running the Server
+
+### Development Mode
 ```bash
-# Windows
-python -m venv venv
-venv\Scripts\activate
-
-# Linux/Mac
-python3 -m venv venv
-source venv/bin/activate
+# From backend/ directory
+uvicorn app.main:app --reload --port 8000
 ```
 
-2. **Install dependencies:**
-
+### Production Mode
 ```bash
-pip install -r requirements.txt
-```
+# Set environment variable
+export ENV=production  # Linux/Mac
+$env:ENV="production"  # Windows PowerShell
 
-3. **Set up environment variables:**
-
-```bash
-# Copy the example env file
-copy .env.example .env   # Windows
-cp .env.example .env     # Linux/Mac
-
-# Edit .env with your settings
-```
-
-4. **Prepare your data:**
-
-Place your CSV files in the `data/` directory, then combine them:
-
-```bash
-python scripts/combine_csv.py
-```
-
-5. **Train the model:**
-
-```bash
-python scripts/train_baseline.py
-```
-
-This will create `text_classifier.joblib` in the `models/` directory.
-
-## 🏃 Running the Application
-
-### Development Server
-
-```bash
-# From the backend directory
-cd app
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
-```
-
-The API will be available at: `http://localhost:8000`
-
-### Production Server
-
-```bash
-# Set environment to production in .env
-ENV=production
-
-# Run with Gunicorn (recommended for production)
-pip install gunicorn
+# Run with Gunicorn
 gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
 ```
 
 ## 📡 API Endpoints
 
-### Health Check
+### Health Checks
+- `GET /` - API information
+- `GET /health` - Health status
 
-```http
-GET /health
-```
+### ML Predictions
+- `POST /api/ml/predict` - Analyze text for mental health indicators
+  ```json
+  {
+    "text": "I'm feeling overwhelmed"
+  }
+  ```
+  
+- `GET /api/ml/model-info` - Model metadata
 
-Returns API health status.
-
-### Analyze Text
-
-```http
-POST /analyze
-Content-Type: application/json
-
-{
-  "text": "Your text to analyze",
-  "context": ["optional", "conversation", "history"]
-}
-```
-
-**Response:**
-
-```json
-{
-  "risk_label": "normal",
-  "confidence": 0.85,
-  "flags": [],
-  "recommended_action": "normal"
-}
-```
-
-### Root
-
-```http
-GET /
-```
-
-Returns API information.
+### Documentation
+- `GET /docs` - Interactive Swagger UI
+- `GET /redoc` - ReDoc documentation
 
 ## 🧪 Testing
-
-Run the test suite:
 
 ```bash
 # Run all tests
 pytest
 
-# Run with coverage report
-pytest --cov=app --cov=config
+# Run with coverage
+pytest --cov=app --cov-report=html
 
 # Run specific test file
 pytest tests/test_api.py
-
-# Run specific test
-pytest tests/test_api.py::TestHealthEndpoint::test_health_check
 ```
 
-## 📝 Configuration
+## 🔧 Configuration
 
-All configuration is managed through environment variables. Key settings:
+Edit `.env` file or set environment variables:
 
-| Variable     | Default                | Description                          |
-| ------------ | ---------------------- | ------------------------------------ |
-| `ENV`        | development            | Environment (development/production) |
-| `DEBUG`      | True                   | Enable debug mode                    |
-| `PORT`       | 8000                   | Server port                          |
-| `LOG_LEVEL`  | INFO                   | Logging level                        |
-| `MODEL_FILE` | text_classifier.joblib | Model filename                       |
-| `SECRET_KEY` | (required in prod)     | Secret key for security              |
-
-See [.env.example](.env.example) for all available options.
-
-## 📊 Scripts
-
-### Combine CSV Files
-
-Combines multiple CSV files in the `data/` directory:
-
-```bash
-python scripts/combine_csv.py
+```env
+ENV=development
+DEBUG=true
+HOST=0.0.0.0
+PORT=8000
+CORS_ORIGINS=http://localhost:3000,http://localhost:8080
+LOG_LEVEL=INFO
 ```
 
-### Train Model
+## 📦 Dependencies
 
-Trains a new baseline model:
+Core packages:
+- `fastapi` - Web framework
+- `uvicorn` - ASGI server
+- `pydantic` - Data validation
+- `python-dotenv` - Environment management
 
-```bash
-python scripts/train_baseline.py
-```
+See `requirements.txt` for complete list.
 
-### Interactive Prediction
+## 🔗 Integration with ML Module
 
-Test the model interactively:
+The backend integrates with the ML module located at `../ml/`:
 
-```bash
-python scripts/predict.py
-```
+- **Model Loading**: `app/services/ml_service.py` loads models from `ml/models/`
+- **Configuration**: `app/core/config.py` points to ML directories
+- **Predictions**: ML endpoints use `MLService` singleton
 
-## 🔒 Security Considerations
+## 📝 Development Guidelines
 
-- **Never commit `.env` files** - Use `.env.example` as a template
-- **Change SECRET_KEY in production** - Generate a secure key
-- **Use HTTPS** - Enable SSL/TLS in production
-- **Rate limiting** - Configure rate limits in production
-- **Data encryption** - Encrypt sensitive data at rest
-- **CORS** - Configure allowed origins properly
-
-## 📦 Deployment
-
-### Environment Setup
-
-1. Set `ENV=production` in `.env`
-2. Change `SECRET_KEY` to a secure value
-3. Disable `DEBUG` mode
-4. Configure proper CORS origins
-5. Set up SSL certificates
-
-### Production Checklist
-
-- [ ] Environment variables configured
-- [ ] Model file exists in `models/`
-- [ ] Logs directory is writable
-- [ ] HTTPS enabled
-- [ ] Rate limiting configured
-- [ ] Monitoring/alerting set up
-- [ ] Backups configured
-- [ ] Security headers enabled
+1. **Code Style**: Follow PEP 8
+2. **Type Hints**: Use type annotations
+3. **Error Handling**: Use FastAPI HTTPException
+4. **Logging**: Use configured logger from `app.core.logging`
+5. **Testing**: Write tests for new endpoints
 
 ## 🐛 Troubleshooting
 
-### Model file not found
-
-Ensure you've trained the model: `python scripts/train_baseline.py`
-
-### Import errors
-
-Make sure you're in the virtual environment and dependencies are installed:
-
-```bash
-pip install -r requirements.txt
+### Model Not Found
+```
+Error: Model file not found
+Solution: Train the model first (cd ../ml && python src/training/train_baseline.py)
 ```
 
-### Port already in use
-
-Change the port in `.env` or kill the process using the port:
-
-```bash
-# Windows
-netstat -ano | findstr :8000
-taskkill /PID <PID> /F
-
-# Linux/Mac
-lsof -ti:8000 | xargs kill -9
+### Import Errors
+```
+Error: ModuleNotFoundError: No module named 'app'
+Solution: Run from backend/ directory, not from app/
 ```
 
-## 📚 Development
-
-### Code Style
-
-- Use `black` for formatting: `black .`
-- Use `flake8` for linting: `flake8 .`
-- Use `mypy` for type checking: `mypy .`
-
-### Adding Dependencies
-
-```bash
-pip install <package>
-pip freeze > requirements.txt
+### Port Already in Use
+```
+Error: [Errno 10048] Only one usage of each socket address
+Solution: Change PORT in .env or kill process using the port
 ```
 
-## 🤝 Contributing
+## 📚 Additional Resources
 
-1. Create a feature branch
-2. Make your changes
-3. Add tests for new functionality
-4. Ensure all tests pass: `pytest`
-5. Format code: `black .`
-6. Submit a pull request
+- [FastAPI Documentation](https://fastapi.tiangolo.com/)
+- [Pydantic Documentation](https://docs.pydantic.dev/)
+- [Uvicorn Documentation](https://www.uvicorn.org/)
 
 ## 📄 License
 
-[Your License Here]
-
-## 🆘 Support
-
-For issues and questions:
-
-- Check the troubleshooting section
-- Review logs in `logs/app.log`
-- Open an issue on GitHub
+Part of Serenity Mental Health Application
