@@ -4,6 +4,7 @@ Request and response models for API endpoints
 """
 from pydantic import BaseModel, Field, validator
 from typing import Dict, Optional, List
+from datetime import datetime
 
 
 class TextInput(BaseModel):
@@ -61,3 +62,47 @@ class ChatResponse(BaseModel):
     requires_professional_help: bool = Field(False, description="Whether professional help recommended")
     crisis_resources: Optional[Dict] = Field(None, description="Crisis support resources if applicable")
     status: str = Field(..., description="Status of the operation")
+
+
+class MessageResponse(BaseModel):
+    """Response model for a single message"""
+    id: int
+    role: str
+    content: str
+    timestamp: datetime
+    prediction: Optional[str] = None
+    probabilities: Optional[Dict[str, float]] = None
+    crisis_detected: bool = False
+    
+    class Config:
+        from_attributes = True
+
+
+class ConversationResponse(BaseModel):
+    """Response model for conversation list"""
+    id: int
+    title: str
+    started_at: datetime
+    last_message_at: datetime
+    message_count: int
+    is_active: bool
+    crisis_detected: bool
+    
+    class Config:
+        from_attributes = True
+
+
+class ConversationDetail(BaseModel):
+    """Response model for conversation with messages"""
+    id: int
+    title: str
+    started_at: datetime
+    last_message_at: datetime
+    message_count: int
+    is_active: bool
+    crisis_detected: bool
+    messages: List[MessageResponse]
+    
+    class Config:
+        from_attributes = True
+

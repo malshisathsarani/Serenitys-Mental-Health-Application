@@ -1,6 +1,6 @@
 """
 Serenity Mental Health API
-Production-ready FastAPI application with ML integration
+Production-ready FastAPI application with ML integration and MySQL database
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,7 +8,8 @@ import logging
 
 from app.core.config import settings
 from app.core.logging import setup_logging
-from app.api.routes import health, ml, chat
+from app.core.database import init_db, close_db
+from app.api.routes import health, ml, chat, conversations
 from app.services.ml_service import get_ml_service
 
 # Setup logging
@@ -25,7 +26,7 @@ app = FastAPI(
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=["*"],  # Allow all origins for development
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -42,6 +43,10 @@ async def startup_event():
     logger.info("Application startup initiated")
     
     try:
+        # Initialize MySQL database
+        await init_db()
+        logger.info("Database initialized successfully")
+        
         # Initialize ML service (loads model)
         ml_service = get_ml_service()
         logger.info("ML Service initialized successfully")
@@ -61,12 +66,14 @@ async def startup_event():
 async def shutdown_event():
     """Cleanup on shutdown"""
     logger.info("Application shutdown initiated")
+    await close_db()
 
 
 # Include routers
 app.include_router(health.router)
 app.include_router(ml.router, prefix="/api")
 app.include_router(chat.router, prefix="/api")
+app.include_router(conversations.router, prefix="/api")
 
 
 # Run application
