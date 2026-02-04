@@ -53,11 +53,16 @@ class Settings:
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
-    # CORS
+    # CORS - Allow all localhost ports for development
     CORS_ORIGINS: List[str] = [
         "http://localhost:3000",
         "http://localhost:8080",
-        "http://localhost:8081",  # Flutter web
+        "http://localhost:8081",
+        "http://localhost:60900",  # Flutter web dev server
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:8080",
+        "http://127.0.0.1:8081",
+        "http://127.0.0.1:60900",
     ]
     
     # Rate limiting
