@@ -201,7 +201,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                   ElevatedButton(
-                    onPressed: () => context.go('/tools'),
+                    onPressed: () => context.push('/calm-puzzle'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF4DB8A8),
                       foregroundColor: Colors.white,
