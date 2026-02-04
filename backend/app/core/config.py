@@ -48,6 +48,15 @@ class Settings:
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
     LOG_FORMAT: str = os.getenv("LOG_FORMAT", "json")
     
+    # Database Configuration
+    # MySQL (Production) - Format: mysql+aiomysql://user:password@host:port/database
+    # SQLite (Development) - Format: sqlite+aiosqlite:///./serenity.db
+    DATABASE_URL: str = os.getenv(
+        "DATABASE_URL", 
+        "mysql+aiomysql://root:@localhost:3306/serenity_db?charset=utf8mb4"
+    )
+    DATABASE_ECHO: bool = DEBUG  # Log SQL queries in debug mode
+    
     # Security
     SECRET_KEY: str = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production")
     ALGORITHM: str = "HS256"
