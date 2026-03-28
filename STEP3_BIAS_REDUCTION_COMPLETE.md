@@ -49,6 +49,7 @@ API returns performance improvement summary
 **File:** `backend/app/services/feedback_processor.py`
 
 **Responsibilities:**
+
 - Extract unhelpful feedback from database
 - Link feedback to original user input and predictions
 - Infer corrected labels from feedback comments
@@ -77,6 +78,7 @@ await feedback_processor.calculate_bias_metrics(
 **File:** `backend/app/services/model_retrainer.py`
 
 **Responsibilities:**
+
 - Load original training data
 - Mix with feedback-corrected data (weighted sampling)
 - Train new TF-IDF vectorizer + Logistic Regression
@@ -104,13 +106,13 @@ await retrainer.compare_models()
 
 **Endpoints:**
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/training/feedback-summary` | GET | View bias patterns from user feedback |
-| `/api/training/bias-metrics` | GET | Calculate fairness metrics by prediction type |
-| `/api/training/retrain-model` | POST | Trigger model retraining with feedback |
-| `/api/training/model-versions` | GET | View history of trained model versions |
-| `/api/training/compare-models` | POST | Compare current vs previous model |
+| Endpoint                         | Method | Purpose                                       |
+| -------------------------------- | ------ | --------------------------------------------- |
+| `/api/training/feedback-summary` | GET    | View bias patterns from user feedback         |
+| `/api/training/bias-metrics`     | GET    | Calculate fairness metrics by prediction type |
+| `/api/training/retrain-model`    | POST   | Trigger model retraining with feedback        |
+| `/api/training/model-versions`   | GET    | View history of trained model versions        |
+| `/api/training/compare-models`   | POST   | Compare current vs previous model             |
 
 ---
 
@@ -155,19 +157,19 @@ Response:
         "total": 15,
         "helpful": 12,
         "unhelpful": 3,
-        "helpful_rate": 0.80,
+        "helpful_rate": 0.8,
         "confidence_avg": 0.92
       },
       "Anxiety": {
         "total": 20,
         "helpful": 10,
         "unhelpful": 10,
-        "helpful_rate": 0.50,
+        "helpful_rate": 0.5,
         "confidence_avg": 0.65
       }
     },
     "concerning_categories": {
-      "Anxiety": {"helpful_rate": 0.50, "total": 20}
+      "Anxiety": { "helpful_rate": 0.5, "total": 20 }
     },
     "recommendation": "Anxiety prediction has low helpful rate (50%) - needs retraining"
   }
@@ -199,8 +201,8 @@ Response:
     "macro_f1": 0.7924,
     "weighted_f1": 0.8356,
     "per_class": {
-      "Suicidal": {"precision": 0.92, "recall": 0.88, "f1": 0.90},
-      "Anxiety": {"precision": 0.76, "recall": 0.82, "f1": 0.79}
+      "Suicidal": { "precision": 0.92, "recall": 0.88, "f1": 0.9 },
+      "Anxiety": { "precision": 0.76, "recall": 0.82, "f1": 0.79 }
     }
   },
   "training_summary": {
@@ -313,6 +315,7 @@ curl http://localhost:8000/api/training/model-versions
 ### Deploy
 
 If accuracy improved ≥1%:
+
 - Old model automatically backed up to `ml/models/backups/`
 - New model immediately active
 - Version metadata saved to `ml/models/versions.json`
@@ -406,15 +409,16 @@ Last 10 versions kept in `ml/models/versions.json`:
 
 ```json
 [
-  {"version": "v1", "accuracy": 0.81},
-  {"version": "v2", "accuracy": 0.82},
-  {"version": "v3", "accuracy": 0.84}  // Latest
+  { "version": "v1", "accuracy": 0.81 },
+  { "version": "v2", "accuracy": 0.82 },
+  { "version": "v3", "accuracy": 0.84 } // Latest
 ]
 ```
 
 ### Model Backup
 
 Previous model automatically backed up:
+
 - Location: `ml/models/backups/model_backup_20260328_143000.joblib`
 - Allows rollback if new model performs worse
 
@@ -453,6 +457,7 @@ _submitMessageFeedback(
 ### Retraining Trigger (Automation)
 
 Can be triggered:
+
 1. **Manual:** Via API endpoint
 2. **Scheduled:** Cron job daily/weekly
 3. **Threshold-based:** Auto-trigger after ≥10 unhelpful feedbacks
@@ -547,14 +552,14 @@ test_bias_pattern_identification - PASSED
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
+| File                                         | Purpose                      |
+| -------------------------------------------- | ---------------------------- |
 | `backend/app/services/feedback_processor.py` | Extract and analyze feedback |
-| `backend/app/services/model_retrainer.py` | Retrain model with feedback |
-| `backend/app/api/routes/training.py` | API endpoints for retraining |
-| `backend/tests/test_feedback_processor.py` | Unit tests |
-| `ml/models/versions.json` | Model version history |
-| `ml/models/backups/` | Previous model versions |
+| `backend/app/services/model_retrainer.py`    | Retrain model with feedback  |
+| `backend/app/api/routes/training.py`         | API endpoints for retraining |
+| `backend/tests/test_feedback_processor.py`   | Unit tests                   |
+| `ml/models/versions.json`                    | Model version history        |
+| `ml/models/backups/`                         | Previous model versions      |
 
 ---
 
@@ -572,6 +577,6 @@ This bias reduction learning loop demonstrates:
 ✅ **Fairness Monitoring:** Tracks bias metrics by category  
 ✅ **Automated Retraining:** Processes feedback → retrains → validates  
 ✅ **Version Control:** Maintains model evolution history  
-✅ **Production Readiness:** Backups, rollback, metrics tracking  
+✅ **Production Readiness:** Backups, rollback, metrics tracking
 
 This addresses the FYP requirement for **adaptive AI systems that learn from corrections and improve fairness over time**.
