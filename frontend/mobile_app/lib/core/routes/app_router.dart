@@ -9,6 +9,10 @@ import '../../features/chat/screens/chat_screen.dart';
 import '../../features/tools/screens/tools_screen.dart';
 import '../../features/tools/screens/breathing_bubble_screen.dart';
 import '../../features/tools/screens/calm_puzzle_screen.dart';
+import '../../features/tools/screens/drawing_game_screen.dart';
+import '../../features/tools/screens/sleep_stories_screen.dart';
+import '../../features/tools/screens/guided_relaxation_screen.dart';
+import '../../features/tools/screens/white_noise_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
 import '../../features/crisis/screens/crisis_screen.dart';
 
@@ -53,6 +57,22 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/tools/calm-puzzle',
       builder: (context, state) => const CalmPuzzleScreen(),
+    ),
+    GoRoute(
+      path: '/tools/drawing',
+      builder: (context, state) => const DrawingGameScreen(),
+    ),
+    GoRoute(
+      path: '/tools/sleep-stories',
+      builder: (context, state) => const SleepStoriesScreen(),
+    ),
+    GoRoute(
+      path: '/tools/guided-relaxation',
+      builder: (context, state) => const GuidedRelaxationScreen(),
+    ),
+    GoRoute(
+      path: '/tools/white-noise',
+      builder: (context, state) => const WhiteNoiseScreen(),
     ),
     GoRoute(
       path: '/profile',
