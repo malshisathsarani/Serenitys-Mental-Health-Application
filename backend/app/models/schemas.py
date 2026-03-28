@@ -45,6 +45,21 @@ class ChatRequest(BaseModel):
     """Request model for chat message"""
     message: str = Field(..., min_length=1, max_length=5000, description="User's message")
     conversation_history: Optional[List[str]] = Field(None, description="Previous messages for context")
+    conversation_id: Optional[int] = Field(
+        None,
+        ge=1,
+        description="Existing conversation id to continue; omit to start a new conversation",
+    )
+    voice_risk_score: Optional[float] = Field(
+        None,
+        ge=0.0,
+        le=1.0,
+        description="Optional voice-derived risk score (0.0-1.0) from audio analysis",
+    )
+    voice_crisis_detected: Optional[bool] = Field(
+        None,
+        description="Optional voice crisis flag from audio analysis",
+    )
     
     @validator('message')
     def validate_message(cls, v):
@@ -56,12 +71,58 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     """Response model for chat message"""
     response: str = Field(..., description="Chatbot's response")
+    conversation_id: int = Field(..., description="Conversation this exchange belongs to")
+    assistant_message_id: int = Field(
+        ...,
+        description="Database id of the assistant message (for feedback and multimodal metadata)",
+    )
     prediction: Optional[str] = Field(None, description="Mental health prediction")
     probabilities: Dict[str, float] = Field(default_factory=dict, description="Prediction probabilities")
-    crisis_detected: bool = Field(False, description="Whether crisis situation detected")
+    crisis_detected: bool = Field(False, description="Whether crisis situation detected (fused)")
+    crisis_fusion_sources: List[str] = Field(
+        default_factory=list,
+        description="Which signals contributed to crisis_detected (e.g. text, voice)",
+    )
+    fused_risk_score: Optional[float] = Field(
+        None,
+        description="Combined text+voice risk score (0.0-1.0) when available",
+    )
+    voice_risk_score: Optional[float] = Field(
+        None,
+        description="Voice-only risk score (0.0-1.0) when provided",
+    )
     requires_professional_help: bool = Field(False, description="Whether professional help recommended")
     crisis_resources: Optional[Dict] = Field(None, description="Crisis support resources if applicable")
     status: str = Field(..., description="Status of the operation")
+
+
+class VoiceAnalysisResponse(BaseModel):
+    """Response model for uploaded audio risk analysis."""
+    voice_risk_score: float = Field(..., ge=0.0, le=1.0)
+    voice_crisis_detected: bool = Field(...)
+    confidence: float = Field(..., ge=0.0, le=1.0)
+    method: str = Field(..., description="How audio was analyzed")
+    details: Dict[str, float] = Field(default_factory=dict)
+    status: str = Field(..., description="Status of operation")
+
+
+class FeedbackRequest(BaseModel):
+    """Request model for assistant response feedback."""
+    message_id: int = Field(..., ge=1, description="Assistant message id")
+    helpful: bool = Field(..., description="Whether response felt appropriate/fair")
+    comment: Optional[str] = Field(
+        None,
+        max_length=1000,
+        description="Optional feedback note",
+    )
+
+
+class FeedbackResponse(BaseModel):
+    """Response model for feedback submission."""
+    feedback_id: int
+    message_id: int
+    helpful: bool
+    status: str
 
 
 class MessageResponse(BaseModel):
@@ -105,4 +166,55 @@ class ConversationDetail(BaseModel):
     
     class Config:
         from_attributes = True
+
+
+class EmergencyContactRequest(BaseModel):
+    """Request model for adding emergency contact"""
+    name: str = Field(..., min_length=1, max_length=255, description="Contact name or title")
+    phone_number: str = Field(..., description="Phone number in E.164 format (e.g., +12025551234)")
+    contact_relationship: Optional[str] = Field(None, max_length=100, description="Relationship description")
+    is_hotline: Optional[bool] = Field(False, description="Whether this is a crisis hotline")
+    
+    @validator('phone_number')
+    def validate_phone(cls, v):
+        # Basic E.164 format validation (+ followed by 1-15 digits)
+        import re
+        if not re.match(r'^\+[1-9]\d{1,14}$', v):
+            raise ValueError('Phone must be in E.164 format (e.g., +12025551234)')
+        return v
+
+
+class EmergencyContactResponse(BaseModel):
+    """Response model for emergency contact"""
+    id: int
+    name: str
+    phone_number: str
+    contact_relationship: Optional[str]
+    is_hotline: bool
+    is_active: bool
+    status: str
+    
+    class Config:
+        from_attributes = True
+
+
+class EmergencyCallResponse(BaseModel):
+    """Response model for emergency call record"""
+    id: int
+    phone_number: str
+    call_sid: Optional[str]
+    status: str
+    crisis_type: Optional[str]
+    fused_risk_score: Optional[float]
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+class EmergencyCallListResponse(BaseModel):
+    """Response model for list of emergency calls"""
+    total_calls: int
+    calls: List[EmergencyCallResponse]
+    status: str
 
