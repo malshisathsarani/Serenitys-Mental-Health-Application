@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../shared/widgets/custom_app_bar.dart';
 import '../../../shared/widgets/bottom_nav_bar.dart';
+import '../../../core/services/emergency_settings_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -13,6 +14,53 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   bool _notifications = true;
   bool _darkMode = false;
+  bool _autoPromptEnabled = false;
+  final TextEditingController _hotlineController = TextEditingController();
+  final TextEditingController _contactController = TextEditingController();
+  int _countdownSec = EmergencySettingsService.defaultCountdownSec;
+  final EmergencySettingsService _emergencySettingsService =
+      EmergencySettingsService();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEmergencySettings();
+  }
+
+  Future<void> _loadEmergencySettings() async {
+    final settings = await _emergencySettingsService.load();
+    if (!mounted) return;
+    setState(() {
+      _autoPromptEnabled = settings.autoPromptEnabled;
+      _countdownSec = settings.autoPromptCountdownSec;
+      _hotlineController.text = settings.hotlineNumber;
+      _contactController.text = settings.emergencyContactNumber;
+    });
+  }
+
+  Future<void> _saveEmergencySettings() async {
+    await _emergencySettingsService.save(
+      EmergencySettings(
+        hotlineNumber: _hotlineController.text.trim().isEmpty
+            ? EmergencySettingsService.defaultHotline
+            : _hotlineController.text.trim(),
+        emergencyContactNumber: _contactController.text.trim(),
+        autoPromptEnabled: _autoPromptEnabled,
+        autoPromptCountdownSec: _countdownSec,
+      ),
+    );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Emergency settings saved')),
+    );
+  }
+
+  @override
+  void dispose() {
+    _hotlineController.dispose();
+    _contactController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +115,83 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   ),
                 ],
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Emergency Safety
+            Text(
+              'Emergency Safety',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 12),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Allow crisis auto-prompt'),
+                      subtitle: const Text(
+                        'If high-risk is detected, show a countdown to call your hotline.',
+                      ),
+                      value: _autoPromptEnabled,
+                      onChanged: (value) {
+                        setState(() => _autoPromptEnabled = value);
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _hotlineController,
+                      keyboardType: TextInputType.phone,
+                      decoration: const InputDecoration(
+                        labelText: 'Hotline number',
+                        hintText: 'e.g. 988',
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _contactController,
+                      keyboardType: TextInputType.phone,
+                      decoration: const InputDecoration(
+                        labelText: 'Emergency contact number',
+                        hintText: 'Optional backup contact',
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        const Text('Auto-prompt countdown:'),
+                        const SizedBox(width: 12),
+                        DropdownButton<int>(
+                          value: _countdownSec,
+                          items: const [5, 8, 10, 15]
+                              .map(
+                                (s) => DropdownMenuItem<int>(
+                                  value: s,
+                                  child: Text('$s sec'),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            if (value == null) return;
+                            setState(() => _countdownSec = value);
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: ElevatedButton(
+                        onPressed: _saveEmergencySettings,
+                        child: const Text('Save emergency settings'),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 24),

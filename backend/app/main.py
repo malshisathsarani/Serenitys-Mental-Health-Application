@@ -1,6 +1,6 @@
 """
 Serenity Mental Health API
-Production-ready FastAPI application with ML integration
+Production-ready FastAPI application with ML integration and MySQL database
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -55,6 +55,10 @@ async def startup_event():
     logger.info("Application startup initiated")
     
     try:
+        # Initialize MySQL database
+        await init_db()
+        logger.info("Database initialized successfully")
+        
         # Initialize ML service (loads model)
         ml_service = get_ml_service()
         logger.info("ML Service initialized successfully")
@@ -74,12 +78,19 @@ async def startup_event():
 async def shutdown_event():
     """Cleanup on shutdown"""
     logger.info("Application shutdown initiated")
+    await close_db()
 
 
 # Include routers
 app.include_router(health.router)
 app.include_router(auth.router, prefix="/api")
 app.include_router(ml.router, prefix="/api")
+app.include_router(chat.router, prefix="/api")
+app.include_router(conversations.router, prefix="/api")
+app.include_router(voice.router, prefix="/api")
+app.include_router(feedback.router, prefix="/api")
+app.include_router(emergency.router, prefix="/api")
+app.include_router(training.router, prefix="/api")
 
 
 # Run application

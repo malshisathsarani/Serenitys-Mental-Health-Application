@@ -24,6 +24,7 @@ AsyncSessionLocal = async_sessionmaker(
     class_=AsyncSession,
     expire_on_commit=False,
     autoflush=False,
+<<<<<<< features/authentication
     autocommit=False,
 )
 
@@ -32,13 +33,57 @@ async def get_db() -> AsyncSession:
     """
     Dependency to get database session for FastAPI routes
     Yields an async database session that is automatically closed after use
+=======
+    autocommit=False
+)
+
+# Base class for models
+Base = declarative_base()
+
+
+async def get_db():
+    """
+    Dependency for getting database session
+    Usage: db: AsyncSession = Depends(get_db)
+>>>>>>> dev
     """
     async with AsyncSessionLocal() as session:
         try:
             yield session
+<<<<<<< features/authentication
         except Exception as e:
             await session.rollback()
             logger.error(f"Database session error: {e}")
             raise
         finally:
             await session.close()
+=======
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
+        finally:
+            await session.close()
+
+
+async def init_db():
+    """Initialize database tables"""
+    try:
+        async with engine.begin() as conn:
+            # Import all models to ensure they're registered
+            from app.models import database
+            
+            # Create all tables
+            await conn.run_sync(Base.metadata.create_all)
+        
+        logger.info("Database initialized successfully")
+    except Exception as e:
+        logger.error(f"Database initialization failed: {e}")
+        raise
+
+
+async def close_db():
+    """Close database connections"""
+    await engine.dispose()
+    logger.info("Database connections closed")
+>>>>>>> dev

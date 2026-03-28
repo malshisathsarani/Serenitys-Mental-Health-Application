@@ -1,6 +1,6 @@
 # Serenity Mental Health ML Module - Dependencies
 # Core ML and Data Processing
-scikit-learn>=1.4.0
+scikit-learn>=1.6.0
 joblib>=1.4.2
 pandas>=2.2.0
 numpy>=1.26.3
