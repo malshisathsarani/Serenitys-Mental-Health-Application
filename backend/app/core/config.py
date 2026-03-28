@@ -79,6 +79,23 @@ class Settings:
     RATE_LIMIT_REQUESTS: int = int(os.getenv("RATE_LIMIT_REQUESTS", "100"))
     RATE_LIMIT_WINDOW: int = int(os.getenv("RATE_LIMIT_WINDOW", "60"))
     
+    # Twilio Configuration - Emergency Calling
+    TWILIO_ENABLED: bool = os.getenv("TWILIO_ENABLED", "False").lower() == "true"
+    TWILIO_ACCOUNT_SID: str = os.getenv("TWILIO_ACCOUNT_SID", "")
+    TWILIO_AUTH_TOKEN: str = os.getenv("TWILIO_AUTH_TOKEN", "")
+    TWILIO_PHONE_NUMBER: str = os.getenv("TWILIO_PHONE_NUMBER", "")  # E.164 format: +1234567890
+    
+    # Emergency calling thresholds and settings
+    EMERGENCY_CALL_THRESHOLD: float = float(os.getenv("EMERGENCY_CALL_THRESHOLD", "0.75"))  # Risk score threshold
+    EMERGENCY_CALL_TIMEOUT: int = int(os.getenv("EMERGENCY_CALL_TIMEOUT", "30"))  # seconds
+    EMERGENCY_CALL_MAX_RETRIES: int = int(os.getenv("EMERGENCY_CALL_MAX_RETRIES", "2"))
+    
+    # Default crisis hotlines (fallback if user has no emergency contacts)
+    DEFAULT_CRISIS_HOTLINES: List[str] = [
+        "+19882255247",  # 988 Suicide & Crisis Lifeline (US)
+        "+14155235239",  # Crisis Text Line (US)
+    ]
+    
     # Health check
     HEALTH_CHECK_ENABLED: bool = os.getenv("HEALTH_CHECK_ENABLED", "True").lower() == "true"
     
