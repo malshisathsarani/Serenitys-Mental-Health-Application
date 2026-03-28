@@ -8,7 +8,8 @@ import logging
 
 from app.core.config import settings
 from app.core.logging import setup_logging
-from app.api.routes import health, ml, auth
+from app.core.database import init_db, close_db
+from app.api.routes import health, ml, auth, chat, conversations, voice, feedback, emergency, training
 from app.middleware.auth import AuthMiddleware
 from app.services.ml_service import get_ml_service
 

@@ -3,7 +3,7 @@ Pydantic Models/Schemas
 Request and response models for API endpoints
 """
 from pydantic import BaseModel, Field, validator, EmailStr
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 from datetime import datetime
 
 
