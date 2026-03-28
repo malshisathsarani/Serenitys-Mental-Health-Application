@@ -9,7 +9,7 @@ import logging
 from app.core.config import settings
 from app.core.logging import setup_logging
 from app.core.database import init_db, close_db
-from app.api.routes import health, ml, chat, conversations, voice, feedback, emergency
+from app.api.routes import health, ml, chat, conversations, voice, feedback, emergency, training
 from app.services.ml_service import get_ml_service
 
 # Setup logging
@@ -77,6 +77,7 @@ app.include_router(conversations.router, prefix="/api")
 app.include_router(voice.router, prefix="/api")
 app.include_router(feedback.router, prefix="/api")
 app.include_router(emergency.router, prefix="/api")
+app.include_router(training.router, prefix="/api")
 
 
 # Run application
