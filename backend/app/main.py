@@ -8,8 +8,8 @@ import logging
 
 from app.core.config import settings
 from app.core.logging import setup_logging
-from app.core.database import init_db, close_db
-from app.api.routes import health, ml, chat, conversations, voice, feedback, emergency, training
+from app.api.routes import health, ml, auth
+from app.middleware.auth import AuthMiddleware
 from app.services.ml_service import get_ml_service
 
 # Setup logging
@@ -23,14 +23,26 @@ app = FastAPI(
     debug=settings.DEBUG
 )
 
-# Configure CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for development
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Configure CORS - Allow localhost with any port in development
+if settings.ENV.lower() == "development":
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origin_regex=r"http://localhost(?::\d+)?|http://127\.0\.0\.1(?::\d+)?",
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+else:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.CORS_ORIGINS,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+# Add authentication middleware
+app.add_middleware(AuthMiddleware)
 
 logger.info(f"Starting {settings.APP_NAME} v{settings.APP_VERSION}")
 logger.info(f"Environment: {settings.ENV}")
@@ -71,6 +83,7 @@ async def shutdown_event():
 
 # Include routers
 app.include_router(health.router)
+app.include_router(auth.router, prefix="/api")
 app.include_router(ml.router, prefix="/api")
 app.include_router(chat.router, prefix="/api")
 app.include_router(conversations.router, prefix="/api")

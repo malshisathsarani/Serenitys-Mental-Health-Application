@@ -1,29 +1,39 @@
 """
-Database Configuration and Session Management
-Async SQLAlchemy setup for MySQL database
+Database configuration and session management for SQLAlchemy
 """
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import declarative_base
-from app.core.config import settings
+from app.core.config import DATABASE_URL
 import logging
 
 logger = logging.getLogger(__name__)
 
+# SQLAlchemy declarative base for all models
+Base = declarative_base()
+
 # Create async engine
 engine = create_async_engine(
-    settings.DATABASE_URL,
-    echo=settings.DATABASE_ECHO,
+    DATABASE_URL,
+    echo=False,
     future=True,
-    pool_pre_ping=True,  # Verify connections before using
-    pool_recycle=3600,   # Recycle connections after 1 hour
 )
 
-# Create async session factory
+# Create async sessionmaker
 AsyncSessionLocal = async_sessionmaker(
     engine,
     class_=AsyncSession,
     expire_on_commit=False,
     autoflush=False,
+<<<<<<< features/authentication
+    autocommit=False,
+)
+
+
+async def get_db() -> AsyncSession:
+    """
+    Dependency to get database session for FastAPI routes
+    Yields an async database session that is automatically closed after use
+=======
     autocommit=False
 )
 
@@ -35,10 +45,19 @@ async def get_db():
     """
     Dependency for getting database session
     Usage: db: AsyncSession = Depends(get_db)
+>>>>>>> dev
     """
     async with AsyncSessionLocal() as session:
         try:
             yield session
+<<<<<<< features/authentication
+        except Exception as e:
+            await session.rollback()
+            logger.error(f"Database session error: {e}")
+            raise
+        finally:
+            await session.close()
+=======
             await session.commit()
         except Exception:
             await session.rollback()
@@ -67,3 +86,4 @@ async def close_db():
     """Close database connections"""
     await engine.dispose()
     logger.info("Database connections closed")
+>>>>>>> dev

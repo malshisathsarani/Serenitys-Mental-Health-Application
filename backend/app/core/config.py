@@ -62,16 +62,26 @@ class Settings:
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
-    # CORS - Allow all localhost ports for development
+    # Database
+    DB_USER: str = os.getenv("DB_USER", "root")
+    DB_PASSWORD: str = os.getenv("DB_PASSWORD", "")
+    DB_HOSTNAME: str = os.getenv("DB_HOSTNAME", "localhost")
+    DB_PORT: int = int(os.getenv("DB_PORT", "3306"))
+    DB_NAME: str = os.getenv("DB_NAME", "serenity_db")
+    DATABASE_URL: str = f"mysql+aiomysql://{DB_USER}:{DB_PASSWORD}@{DB_HOSTNAME}:{DB_PORT}/{DB_NAME}"
+    
+    # CORS - Allow all localhost origins in development for Flutter
     CORS_ORIGINS: List[str] = [
+        "http://localhost",
         "http://localhost:3000",
+        "http://localhost:8000",
         "http://localhost:8080",
         "http://localhost:8081",
-        "http://localhost:60900",  # Flutter web dev server
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:8080",
-        "http://127.0.0.1:8081",
-        "http://127.0.0.1:60900",
+        "http://127.0.0.1",
+        "http://127.0.0.1:8000",
+        # Mobile/emulator develops typically use random ports - allow all in dev
+    ] if os.getenv("ENV", "development").lower() == "development" else [
+        "https://yourdomain.com",  # Production domain
     ]
     
     # Rate limiting
@@ -132,3 +142,9 @@ settings = Settings()
 
 # Ensure directories exist
 settings.ensure_directories()
+
+# Export commonly used settings at module level for easy importing
+DATABASE_URL = settings.DATABASE_URL
+SECRET_KEY = settings.SECRET_KEY
+ALGORITHM = settings.ALGORITHM
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES

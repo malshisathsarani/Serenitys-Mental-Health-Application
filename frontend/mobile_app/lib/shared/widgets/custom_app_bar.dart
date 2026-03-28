@@ -4,6 +4,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
   final String? subtitle;
   final bool showAvatar;
+  final String? avatarInitials;
   final Widget? action;
 
   const CustomAppBar({
@@ -11,6 +12,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.title,
     this.subtitle,
     this.showAvatar = false,
+    this.avatarInitials = 'U',
     this.action,
   });
 
@@ -44,9 +46,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             padding: const EdgeInsets.only(right: 16),
             child: CircleAvatar(
               backgroundColor: Theme.of(context).primaryColor,
-              child: const Text(
-                'JD',
-                style: TextStyle(color: Colors.white),
+              child: Text(
+                avatarInitials ?? 'U',
+                style: const TextStyle(color: Colors.white),
               ),
             ),
           ),

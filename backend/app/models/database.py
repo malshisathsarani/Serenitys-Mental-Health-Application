@@ -9,19 +9,31 @@ from app.core.database import Base
 
 
 class User(Base):
-    """User model for storing user information"""
+    """User model for storing user information and authentication"""
     __tablename__ = "users"
     
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     username = Column(String(100), unique=True, nullable=False, index=True)
-    email = Column(String(255), unique=True, index=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    email = Column(String(255), unique=True, nullable=False, index=True)
+    password_hash = Column(String(255), nullable=False)  # bcrypt hashed password
+    full_name = Column(String(255), nullable=True)  # Optional profile info
+    is_active = Column(Boolean, default=True)  # Account status
+    is_verified = Column(Boolean, default=False)  # Email verification
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    last_login_at = Column(DateTime, nullable=True)  # Track user activity
     
     # Relationships
     conversations = relationship("Conversation", back_populates="user", cascade="all, delete-orphan")
     
+    # Indexes for auth performance
+    __table_args__ = (
+        Index('idx_email_active', 'email', 'is_active'),
+        Index('idx_username_active', 'username', 'is_active'),
+    )
+    
     def __repr__(self):
-        return f"<User(id={self.id}, username='{self.username}')>"
+        return f"<User(id={self.id}, email='{self.email}', username='{self.username}')>"
 
 
 class Conversation(Base):
