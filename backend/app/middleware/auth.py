@@ -31,6 +31,10 @@ class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: Callable) -> any:
         """Process request and extract auth token"""
         
+        # Allow CORS preflight requests without authentication
+        if request.method == "OPTIONS":
+            return await call_next(request)
+        
         # Skip middleware for public routes
         if any(request.url.path.startswith(route) for route in self.PUBLIC_ROUTES):
             return await call_next(request)
